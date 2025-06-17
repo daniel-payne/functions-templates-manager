@@ -17,5 +17,3 @@ node functions-templates-extract
 ```bash
 node functions-templates-watch
 ```
-
-I hope this can help anybody having the same issues as I have when writing long functions in node-red. Coding anything over 50 lines become difficult to work with, or trying to view multiple functions at the same time. The rest of node-red is fantastic! Flow2Scr worked well, but did not extract the vue parts of dashboard 2 custom templates.
