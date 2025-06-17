@@ -1,4 +1,4 @@
-# node-red and vs code integration hack
+# node-red and vs-code integration hack
 
 When building a complex dashboards in node-red having the ability to edit in VS Code speeds up development. 
 
