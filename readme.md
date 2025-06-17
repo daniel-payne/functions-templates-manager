@@ -8,7 +8,7 @@ You run the node script **functions-templates-extract** before you start working
 
 Then run **functions-templates-watch** and any changes you make on save are loaded into node-red.
 
-Put the scripts next to your flows.js
+Put all **three** scripts next to your flows.js
 
 
 ```bash
