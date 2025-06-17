@@ -1,0 +1,9 @@
+When building a complex dashboards in node-red having the ability to edit in VS Code speeds up development. 
+
+I have not found any integrations td do this, so as a workaround; these node scripts extract and return the function nodes, or the vue templates of dashboard2 elements.
+
+You run the node script "functions-templates-extract" before you start working, 
+Then run "functions-templates-watch" and any changes you make on save are loaded into node-red.
+
+1. node functions-templates-extract
+2. node functions-templates-watch

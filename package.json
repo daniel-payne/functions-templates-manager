@@ -1,0 +1,12 @@
+{
+  "name": "functions-templates-manager",
+  "version": "1.0.0",
+  "description": "Node Functions to extract code to use in VSfunctions and templates to use in VS Code",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
