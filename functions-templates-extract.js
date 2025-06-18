@@ -52,12 +52,12 @@ flows.forEach((item, idx) => {
 
         fs.writeFileSync(outFile, data, 'utf8');
 
-        console.log(`Extracted ${folder}/${baseFile}`);
+        // console.log(`Extracted ${folder}/${baseFile}`);
     }
 });
 
 if (count === 0) {
-    console.log('No Vue 3 templates found in format fields.');
+    console.log('No Functions or templates found in format fields.');
 } else {
-    console.log(`Extracted ${count} Vue 3 templates.`);
+    console.log(`Extracted ${count} functions or templates.`);
 }
