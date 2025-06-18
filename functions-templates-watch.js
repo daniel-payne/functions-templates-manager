@@ -2,29 +2,30 @@ const chokidar = require('chokidar');
 const { spawn } = require('child_process');
 const path = require('path');
 
-const watchDir = path.join(__dirname, 'src');
-const scriptPath = path.join(__dirname, 'functions-templates-collect.js');
+const watchCollectDir = path.join(__dirname, 'src');
 
-let running = false;
-let rerun = false;
+const collectScript = path.join(__dirname, 'functions-templates-collect.js');
 
-function runScript() {
-    if (running) {
-        rerun = true;
+let runningCollect = false;
+let rerunCollect   = false;
+
+function runCollectChanges() {
+    if (runningCollect) {
+        rerunCollect = true;
         return;
     }
-    running = true;
-    const proc = spawn('node', [scriptPath], { stdio: 'inherit' });
+    runningCollect = true;
+    const proc = spawn('node', [collectScript], { stdio: 'inherit' });
     proc.on('close', (code) => {
-        running = false;
-        if (rerun) {
-            rerun = false;
-            runScript();
+        runningCollect = false;
+        if (rerunCollect) {
+            rerunCollect = false;
+            runCollectChanges();
         }
     });
 }
 
-const watcher = chokidar.watch(watchDir, {
+const watcherForCollect = chokidar.watch(watchCollectDir, {
     ignored: /(^|[\/\\])\../, // ignore dotfiles
     persistent: true,
     ignoreInitial: true,
@@ -34,11 +35,11 @@ const watcher = chokidar.watch(watchDir, {
     }
 });
 
-watcher.on('all', (event, filePath) => {
+watcherForCollect.on('all', (event, filePath) => {
     if (filePath.endsWith('.js') || filePath.endsWith('.vue')) {
         console.log(`Detected change (${event}) in ${filePath}. Running functions-templates-collect.js...`);
-        runScript();
+        runCollectChanges();
     }
 });
 
-console.log(`Watching ${watchDir} for .js and .vue changes...`);
+console.log(`Watching ${watchCollectDir} and flows.json`);
