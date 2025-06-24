@@ -1,7 +1,21 @@
 const fs = require('fs');
 const path = require('path');
 
-const inputPath = path.join(__dirname, 'flows.json');
+const namedArguments = extractNamedArguments()
+
+let flowsFile =  './flows.json';
+let inputPath = path.join(__dirname, flowsFile)
+
+if (namedArguments['flows-file'] != null) {
+    flowsFile = namedArguments['flows-file'];
+
+    if (flowsFile.startsWith('./')) {
+        inputPath = path.join(__dirname, flowsFile)
+    } else {
+        inputPath = flowsFile
+    }
+}
+
 const manfestPath = path.join(__dirname, 'src', 'manifest.json');
 
 const flows = JSON.parse(fs.readFileSync(inputPath, 'utf8'));
@@ -99,3 +113,24 @@ if (count === 0) {
 } else {
     console.log(`Extracted ${count} functions or templates.`);
 }
+
+function extractNamedArguments() {
+    const args = process.argv.slice(2); // Skip node and script path
+    const namedArgs = {};
+
+    for (let i = 0; i < args.length; i++) {
+        if (args[i].startsWith('--')) {
+            const key = args[i].slice(2);
+            let value = args[i + 1];
+            if (value && !value.startsWith('--')) {
+                namedArgs[key] = value;
+                i++;
+            } else {
+                namedArgs[key] = true; // Treat as flag if no value
+            }
+        }
+    }
+
+    return namedArgs;
+}
+

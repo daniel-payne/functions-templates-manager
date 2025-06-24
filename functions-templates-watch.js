@@ -1,29 +1,39 @@
 const chokidar = require('chokidar');
 const { spawn } = require('child_process');
 const path = require('path');
+const fs = require('fs-extra');
 
-const watchExtractDir = path.join(__dirname);
 const watchCollectDir = path.join(__dirname, 'src');
 
 const extractScript = path.join(__dirname, 'functions-templates-extract.js');
 const collectScript = path.join(__dirname, 'functions-templates-collect.js');
 
+let extractArgs = ''
+
+const namedArguments = extractNamedArguments()
+
+const defaultFile = './flows.json';
+const flowsFile = namedArguments['flows-file'] ?? defaultFile;
+
+if (flowsFile != defaultFile){
+   extractArgs = ` --flows-file ${flowsFile}`;
+}
 
 let runningExtract = false;
-let rerunExtract   = false;
+let rerunExtract = false;
 let runningCollect = false;
-let rerunCollect   = false;
+let rerunCollect = false;
 
 function runExtractChanges() {
-    if (runningCollect){
-       return;
+    if (runningCollect) {
+        return;
     }
     if (runningExtract) {
-        rerunExtract= true;
+        rerunExtract = true;
         return;
     }
     runningExtract = true;
-    const proc = spawn('node', [extractScript], { stdio: 'inherit' });
+    const proc = spawn('node', [extractScript, extractArgs], { stdio: 'inherit' });
     proc.on('close', (code) => {
         setTimeout(() => {
             runningExtract = false;
@@ -53,7 +63,29 @@ function runCollectChanges() {
     });
 }
 
-const watcherForExtract = chokidar.watch(__dirname + '/flows.json', {
+function extractNamedArguments() {
+    const args = process.argv.slice(2); // Skip node and script path
+    const namedArgs = {};
+
+    for (let i = 0; i < args.length; i++) {
+        if (args[i].startsWith('--')) {
+            const key = args[i].slice(2);
+            let value = args[i + 1];
+            if (value && !value.startsWith('--')) {
+                namedArgs[key] = value;
+                i++;
+            } else {
+                namedArgs[key] = true; // Treat as flag if no value
+            }
+        }
+    }
+
+    return namedArgs;
+}
+
+console.log(__dirname + flowsFile)
+
+const watcherForExtract = chokidar.watch(path.join(__dirname, flowsFile), {
     // ignored: /(^|[\/\\])\../, // ignore dotfiles
     persistent: true,
     // ignoreInitial: true,
@@ -63,7 +95,7 @@ const watcherForExtract = chokidar.watch(__dirname + '/flows.json', {
     // }
 });
 
-const watcherForCollect = chokidar.watch(watchCollectDir, {  
+const watcherForCollect = chokidar.watch(watchCollectDir, {
     ignored: /(^|[\/\\])\../, // ignore dotfiles
     persistent: true,
     ignoreInitial: true,
@@ -74,8 +106,9 @@ const watcherForCollect = chokidar.watch(watchCollectDir, {
 });
 
 watcherForExtract.on('all', (event, filePath) => {
-    if (runningCollect){
-       return;
+    console.log(`Detected change (${event}) in ${filePath}.`);
+    if (runningCollect) {
+        return;
     }
     if (filePath.endsWith('.json')) {
         // console.log(`Detected change (${event}) in ${filePath}. Running functions-templates-extract.js...`);
@@ -84,8 +117,8 @@ watcherForExtract.on('all', (event, filePath) => {
 });
 
 watcherForCollect.on('all', (event, filePath) => {
-    if (runningExtract){
-       return;
+    if (runningExtract) {
+        return;
     }
     if (filePath.endsWith('.js') || filePath.endsWith('.vue')) {
         // console.log(`Detected change (${event}) in ${filePath}. Running functions-templates-collect.js...`);
@@ -93,12 +126,22 @@ watcherForCollect.on('all', (event, filePath) => {
     }
 });
 
+if (namedArguments['clean'] === true) {
+    const srcDir = path.join(__dirname, 'src');
 
-console.log(`Extracting from flows.json`);
+    if (fs.existsSync(srcDir)) {
+        fs.removeSync(srcDir);
+        console.log(`Cleared /src directory`);
+    }
+}
+
+
+
 
 runExtractChanges();
 
-console.log(`Watching ${watchCollectDir} and flows.json`);
+console.log(`Extracting from ${flowsFile}`);
+console.log(`Collecting From ${watchCollectDir}`);
 
 
 

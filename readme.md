@@ -7,16 +7,28 @@ These scripts extract and collect the code in function nodes, or the vue templat
 
 Run **functions-templates-watch**, it extracts all the function and dashboard templates to the /src. 
 It then watches for changes and writes them back to the flows.json. 
-It also watches the flows.json incase you change something in the node-red editor and extracts everything again on deploy.
+It also watches the flows.json in-case you change something in the node-red editor and extracts everything again on deploy.
 
-Put all **three** scripts next to your flows.json
+Put all **three** scripts next to your flows.json, otherwise you will need to set the path to the flows file
+
+There are two options
+
+**--clean** This first removes the /src folder and does a clean extract from flows.json on startup
+
+**--flows-file** (*optional*) Allows you to run the scripts from anywhere, if you don't supply this value it defaults to ./flows.json
 
 ```bash
-node functions-templates-watch
+node functions-templates-watch --clean --flows-file ./flows.json
 ```
+
+version 1.0.1
 
 The file names in /src reflect those in node-red, duplicate names are given (n) additions.
 Any names containing slashes, both forward and backward slashes, are replaces with "-" in the file name. 
 
 There is also error handling in case you delete something in node-red and it is left on the /src.
 I often delete the /src folder before I start the watch.
+
+version 1.0.2
+
+Added --clean & --flows-file options
