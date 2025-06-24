@@ -11,11 +11,15 @@ It also watches the flows.json in-case you change something in the node-red edit
 
 Put all **three** scripts next to your flows.json, otherwise you will need to set the path to the flows file
 
-There are two options
+```bash
+node functions-templates-watch
+```
+
+There are two options you can use
 
 **--clean** This first removes the /src folder and does a clean extract from flows.json on startup
 
-**--flows-file** (*optional*) Allows you to run the scripts from anywhere, if you don't supply this value it defaults to ./flows.json
+**--flows-file** This allows you to run the scripts from anywhere, if you don't supply this value it defaults to ./flows.json
 
 ```bash
 node functions-templates-watch --clean --flows-file ./flows.json
