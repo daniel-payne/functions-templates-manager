@@ -102,16 +102,14 @@ Object.keys(manifest).forEach((id) => {
 
     item.data = null;
 
-    // console.log(`Extracted ${folder}/${baseFile}`);
-
 });
 
 fs.writeFileSync(manfestPath, JSON.stringify(manifest, null, 2), 'utf8');
 
 if (count === 0) {
-    console.log('No Functions or templates found in format fields.');
+    console.info('No Functions or templates found in format fields.');
 } else {
-    console.log(`Extracted ${count} functions or templates.`);
+    console.info(`Extracted ${count} functions or templates.`);
 }
 
 function extractNamedArguments() {
@@ -119,9 +117,23 @@ function extractNamedArguments() {
     const namedArgs = {};
 
     for (let i = 0; i < args.length; i++) {
-        if (args[i].startsWith('--')) {
-            const key = args[i].slice(2);
-            let value = args[i + 1];
+        const input = args[i].trim();
+
+        if (input.startsWith('--')) {
+
+            let key
+            let value
+
+            if (input.indexOf(' ') > -1 && input.indexOf('"') === -1 && input.indexOf(`'`) === -1){
+              const parts = input.split(' ');
+
+              key = parts[0].slice(2);
+              value = parts[1];
+            } else {
+              key = input.slice(2);
+              value = args[i + 1];                
+            }
+
             if (value && !value.startsWith('--')) {
                 namedArgs[key] = value;
                 i++;
@@ -133,4 +145,3 @@ function extractNamedArguments() {
 
     return namedArgs;
 }
-

@@ -9,20 +9,22 @@ Run **functions-templates-watch**, it extracts all the function and dashboard te
 It then watches for changes and writes them back to the flows.json. 
 It also watches the flows.json in-case you change something in the node-red editor and extracts everything again on deploy.
 
-Put all **three** scripts next to your flows.json, otherwise you will need to set the flows file path.
+Put all **three** scripts next to your flows.json, otherwise you will need to set the flows file path. It needs to be three scripts, as the collect and extract run in seperate processes to the watch, so that you can continue editing during a long transfer process.
 
 ```bash
 node functions-templates-watch
 ```
 
-There are two optional arguments you can send to these scripts
+There are three optional arguments you can send to these scripts
 
-**--clean** This first removes the /src folder and does a clean extract from flows.json on startup. Don't forget to merge your changes back into node-red using the "review changes" in the node-red editor, as this will overwrite unsaved changes if the script re-starts.
+**--clean** This first removes the /src folder and does a clean extract from flows.json on startup. Don't forget to merge your changes back into node-red using the "review changes" in the node-red editor, as this will overwrite unsaved /src changes if the script re-starts.
 
 **--flows-file** This allows you to run the scripts from anywhere, if you don't supply this value it defaults to ./flows.json
 
+**--server-url** This allows the scripts to communicate with node-red running on different ports or different location, defaults to http://127.0.0.1:1880
+
 ```bash
-node functions-templates-watch --clean --flows-file ./flows.json
+node functions-templates-watch --clean --flows-file ./flows.json --server-url http://127.0.0.1:1880
 ```
 
 version 1.0.1
@@ -36,3 +38,7 @@ I often delete the /src folder before I start the watch.
 version 1.0.2
 
 Added --clean & --flows-file options
+
+version 1.0.3
+
+Added --server-url options

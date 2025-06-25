@@ -9,14 +9,22 @@ const extractScript = path.join(__dirname, 'functions-templates-extract.js');
 const collectScript = path.join(__dirname, 'functions-templates-collect.js');
 
 let extractArgs = ''
+let collectArgs = ''
 
 const namedArguments = extractNamedArguments()
 
 const defaultFile = './flows.json';
+const defaultUrl = 'http://127.0.0.1:1880'
+
 const flowsFile = namedArguments['flows-file'] ?? defaultFile;
+const serverUrl = namedArguments['server-url'] ?? defaultUrl;
 
 if (flowsFile != defaultFile){
    extractArgs = ` --flows-file ${flowsFile}`;
+}
+
+if (serverUrl != defaultUrl){
+   collectArgs = ` --server-url ${serverUrl}`;
 }
 
 let runningExtract = false;
@@ -53,7 +61,8 @@ function runCollectChanges() {
         return;
     }
     runningCollect = true;
-    const proc = spawn('node', [collectScript], { stdio: 'inherit' });
+
+    const proc = spawn('node', [collectScript, collectArgs], { stdio: 'inherit' });
     proc.on('close', (code) => {
         runningCollect = false;
         if (rerunCollect) {
@@ -62,28 +71,6 @@ function runCollectChanges() {
         }
     });
 }
-
-function extractNamedArguments() {
-    const args = process.argv.slice(2); // Skip node and script path
-    const namedArgs = {};
-
-    for (let i = 0; i < args.length; i++) {
-        if (args[i].startsWith('--')) {
-            const key = args[i].slice(2);
-            let value = args[i + 1];
-            if (value && !value.startsWith('--')) {
-                namedArgs[key] = value;
-                i++;
-            } else {
-                namedArgs[key] = true; // Treat as flag if no value
-            }
-        }
-    }
-
-    return namedArgs;
-}
-
-console.log(__dirname + flowsFile)
 
 const watcherForExtract = chokidar.watch(path.join(__dirname, flowsFile), {
     // ignored: /(^|[\/\\])\../, // ignore dotfiles
@@ -106,12 +93,13 @@ const watcherForCollect = chokidar.watch(watchCollectDir, {
 });
 
 watcherForExtract.on('all', (event, filePath) => {
-    console.log(`Detected change (${event}) in ${filePath}.`);
     if (runningCollect) {
         return;
     }
+
+    console.info(`Detected change (${event}) in ${filePath}.`);
+
     if (filePath.endsWith('.json')) {
-        // console.log(`Detected change (${event}) in ${filePath}. Running functions-templates-extract.js...`);
         runExtractChanges();
     }
 });
@@ -121,7 +109,6 @@ watcherForCollect.on('all', (event, filePath) => {
         return;
     }
     if (filePath.endsWith('.js') || filePath.endsWith('.vue')) {
-        // console.log(`Detected change (${event}) in ${filePath}. Running functions-templates-collect.js...`);
         runCollectChanges();
     }
 });
@@ -131,7 +118,8 @@ if (namedArguments['clean'] === true) {
 
     if (fs.existsSync(srcDir)) {
         fs.removeSync(srcDir);
-        console.log(`Cleared /src directory`);
+
+        console.info(`Cleared /src directory`);
     }
 }
 
@@ -140,8 +128,42 @@ if (namedArguments['clean'] === true) {
 
 runExtractChanges();
 
-console.log(`Extracting from ${flowsFile}`);
-console.log(`Collecting From ${watchCollectDir}`);
+console.info(`Extracting from ${flowsFile}`);
+console.info(`Collecting From ${watchCollectDir}`);
+
+function extractNamedArguments() {
+    const args = process.argv.slice(2); // Skip node and script path
+    const namedArgs = {};
+
+    for (let i = 0; i < args.length; i++) {
+        const input = args[i].trim();
+
+        if (input.startsWith('--')) {
+
+            let key
+            let value
+
+            if (input.indexOf(' ') > -1 && input.indexOf('"') === -1 && input.indexOf(`'`) === -1){
+              const parts = input.split(' ');
+
+              key = parts[0].slice(2);
+              value = parts[1];
+            } else {
+              key = input.slice(2);
+              value = args[i + 1];                
+            }
+
+            if (value && !value.startsWith('--')) {
+                namedArgs[key] = value;
+                i++;
+            } else {
+                namedArgs[key] = true; // Treat as flag if no value
+            }
+        }
+    }
+
+    return namedArgs;
+}
 
 
 

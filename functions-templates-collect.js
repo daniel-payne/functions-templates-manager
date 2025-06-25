@@ -1,9 +1,15 @@
 const fs = require('fs');
 const path = require('path');
 
+const defaultUrl = 'http://127.0.0.1:1880'
+
+const namedArguments = extractNamedArguments()
+
+const serverUrl = namedArguments['server-url'] ?? defaultUrl;
+
 async function reloadFlows() {
     try {
-        const response = await fetch('http://localhost:8081/flows', {
+        const response = await fetch(serverUrl + '/flows', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -12,12 +18,12 @@ async function reloadFlows() {
             body: '{}'
         });
         if (response.status === 204) {
-            console.log('Flows reloaded successfully');
+            console.info('Flows reloaded successfully');
         } else {
-            console.log(`Error: Status ${response.status}`);
+            console.error(`Error Connecting with node-red: Status ${response.status}`);
         }
     } catch (error) {
-        console.error('Error:', error.message);
+        console.error('Error: Could not connect with node-red on : ' + serverUrl);
     }
 }
 
@@ -89,7 +95,7 @@ sourceFiles.forEach(file => {
 
             flow.format = templateContent;
             updatedCount++;
-            console.log(`Updated flow id ${flowId} with ${file}`);
+            console.info(`Updated flow id ${flowId} with ${file}`);
         }
     } else if (isJs) {
         flow = flows.find(f => f.id === flowId && typeof f.func === 'string');
@@ -101,20 +107,47 @@ sourceFiles.forEach(file => {
 
             flow.func = templateContent;
             updatedCount++;
-            console.log(`Updated flow id ${flowId} with ${file}`);
+            console.info(`Updated flow id ${flowId} with ${file}`);
         }
     }
 });
 
 if (updatedCount > 0) {
     fs.writeFileSync(inputPath, JSON.stringify(flows, null, 4), 'utf8');
-    
-    // console.log(`Updated ${updatedCount} items in flows.json`);
 
     reloadFlows();
 }
-// else {
-//     console.log('No matching flows found to update.');
-// }
 
+function extractNamedArguments() {
+    const args = process.argv.slice(2); // Skip node and script path
+    const namedArgs = {};
 
+    for (let i = 0; i < args.length; i++) {
+        const input = args[i].trim();
+
+        if (input.startsWith('--')) {
+
+            let key
+            let value
+
+            if (input.indexOf(' ') > -1 && input.indexOf('"') === -1 && input.indexOf(`'`) === -1){
+              const parts = input.split(' ');
+
+              key = parts[0].slice(2);
+              value = parts[1];
+            } else {
+              key = input.slice(2);
+              value = args[i + 1];                
+            }
+
+            if (value && !value.startsWith('--')) {
+                namedArgs[key] = value;
+                i++;
+            } else {
+                namedArgs[key] = true; // Treat as flag if no value
+            }
+        }
+    }
+
+    return namedArgs;
+}
