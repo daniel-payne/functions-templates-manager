@@ -67,7 +67,7 @@ flows.forEach((item) => {
         fileName = sanitizedName;
     }
 
-    const isVue = (typeof item.format === 'string' && item.format.trim().startsWith('<template>'))
+    const isVue = (typeof item.format === 'string' && (item.format.trim().indexOf('<template>') !== -1))
     const isFun = (typeof item.func === 'string' && item.func.trim().length > 0) && isVue === false
 
     const data = isVue ? item.format : item.func;

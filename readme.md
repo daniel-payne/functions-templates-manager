@@ -9,7 +9,7 @@ Run **functions-templates-watch**, it extracts all the function and dashboard te
 It then watches for changes and writes them back to the flows.json. 
 It also watches the flows.json in-case you change something in the node-red editor and extracts everything again on deploy.
 
-Put all **three** scripts next to your flows.json, otherwise you will need to set the flows file path. It needs to be three scripts, as the collect and extract run in seperate processes to the watch, so that you can continue editing during a long transfer process.
+**Download** and put all **three** scripts next to your flows.json, otherwise you will need to set the flows file path. It needs to be three scripts, as the collect and extract run in separate processes to the watch, so that you can continue editing & saving during a long transfer process.
 
 ```bash
 node functions-templates-watch
