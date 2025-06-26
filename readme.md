@@ -10,7 +10,7 @@ These scripts extract and collect the code in function nodes, or the vue templat
 
 ## how to use
 
-1. Down this project to a local directory
+1. Download this project to a local directory
 
 ```
 git clone https://github.com/daniel-payne/functions-templates-manager.git
@@ -51,7 +51,7 @@ It then watches for changes and writes them back to the flows.json.
 It also watches the flows.json in-case you change something in the node-red editor and extracts everything again on deploy.
 
 
-There are three optional flags you can send to these scripts
+There are four optional flags you can send to these scripts
 
 **--flows-file** This allows you to run the scripts from anywhere, if you don't supply this value it defaults to ```~/.node-red/flows.json```
 
