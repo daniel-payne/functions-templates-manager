@@ -8,7 +8,7 @@ I have not found any integrations to do this, so as a workaround I wrote these s
 
 These scripts extract and collect the code in function nodes, or the vue templates of Dashboard2 elements.
 
-## how to use
+## How to use
 
 1. Download this project to a local directory
 
@@ -73,7 +73,7 @@ export default function function_name(msg){
 
 ## Video overview
 
-*Coming soon, a short video of the scripts in action*
+[Node-red and VS-code Integration on youtube](https://www.youtube.com/watch?v=UivEETkSWW8)
 
 ## Versions
 
