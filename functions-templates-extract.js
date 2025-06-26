@@ -120,7 +120,7 @@ Object.keys(manifest).forEach((id) => {
         const functionName = item.fileName.replace(/\s/g, '_');
 
         if (item.isFun) {
-            data = `function ${functionName}(msg){\n${data}\n\n}`;  
+            data = `export default function ${functionName}(msg){\n${data}\n\n}`;  
         }
     }
 

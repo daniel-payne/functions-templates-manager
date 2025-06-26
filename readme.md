@@ -51,6 +51,8 @@ It then watches for changes and writes them back to the flows.json.
 It also watches the flows.json in-case you change something in the node-red editor and extracts everything again on deploy.
 
 
+There needs to be **three** scripts, as the collect & extract run in separate processes, so you can continue to edit and save during long running synchronization.
+
 There are four optional flags you can send to these scripts
 
 **--flows-file** This allows you to run the scripts from anywhere, if you don't supply this value it defaults to ```~/.node-red/flows.json```
@@ -60,6 +62,14 @@ There are four optional flags you can send to these scripts
 **--clean** This first removes the /src folder and does a clean extract from flows.json on startup. Don't forget to merge your changes back into node-red using the "review changes" in the node-red editor, as this will overwrite unsaved /src changes if the script re-starts.
 
 **--wrap** This wraps the contents of function files with ```function(msg){ <<function body here>> }``` to allow for testing outside of node-red. If you put your test files in the /src folder, make sure you do **NOT** have the ```--clean``` flag enabled as you will **LOSE** your test files each time the script is run. If wrap is enabled, whitespace only changes do not trigger a collection run.
+
+With this flag, the contents of the function files will look like this
+
+```
+export default function function_name(msg){ 
+    <<function body here>> 
+}
+```
 
 ## Video overview
 

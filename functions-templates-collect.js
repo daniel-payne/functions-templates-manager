@@ -130,7 +130,7 @@ if (updatedCount > 0) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function removeFunctionWrapper(code) {
-    const match = code.match(/\s*function\s*.*\(msg\)\s*{/);
+    const match = code.match(/\s*export\s*default\s*function\s*.*\(msg\)\s*{/);
 
     if (match) {
         const result = code.slice(match[0].length).trim();
