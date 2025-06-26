@@ -1,31 +1,39 @@
-const chokidar = require('chokidar');
-const { spawn } = require('child_process');
-const path = require('path');
-const fs = require('fs-extra');
+import chokidar from 'chokidar';
+import path from'path';
+import fs from'fs-extra';
+import yargs from 'yargs';
 
-const watchCollectDir = path.join(__dirname, 'src');
+import { spawn } from 'child_process';
 
-const extractScript = path.join(__dirname, 'functions-templates-extract.js');
-const collectScript = path.join(__dirname, 'functions-templates-collect.js');
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import { hideBin } from 'yargs/helpers';
 
-let extractArgs = ''
-let collectArgs = ''
+// Extract standard process arguments
 
-const namedArguments = extractNamedArguments()
+const currentArges = process.argv.slice(2);
+
+const startupProperties = yargs(hideBin(process.argv)).parse()
+
+const currentPathAndFile = fileURLToPath(import.meta.url);
+const currentDirectory = dirname(currentPathAndFile);
+
+// Default values for flows file and server URL
 
 const defaultFile = './flows.json';
 const defaultUrl = 'http://127.0.0.1:1880'
 
-const flowsFile = namedArguments['flows-file'] ?? defaultFile;
-const serverUrl = namedArguments['server-url'] ?? defaultUrl;
+const flowsFile = startupProperties.flowsFile ?? defaultFile;
+const serverAt = startupProperties.serverAt ?? defaultUrl;
 
-if (flowsFile != defaultFile){
-   extractArgs = ` --flows-file ${flowsFile}`;
-}
+const flowsPath = dirname(flowsFile);
 
-if (serverUrl != defaultUrl){
-   collectArgs = ` --server-url ${serverUrl}`;
-}
+const sourcePath = path.join(flowsPath, 'src');
+
+const extractScript = path.join(currentDirectory, 'functions-templates-extract.js');
+const collectScript = path.join(currentDirectory, 'functions-templates-collect.js');
+
+// Setup the control and calls for Extract & Collect
 
 let runningExtract = false;
 let rerunExtract = false;
@@ -41,7 +49,7 @@ function runExtractChanges() {
         return;
     }
     runningExtract = true;
-    const proc = spawn('node', [extractScript, extractArgs], { stdio: 'inherit' });
+    const proc = spawn('node', [extractScript, ...currentArges], { stdio: 'inherit' });
     proc.on('close', (code) => {
         setTimeout(() => {
             runningExtract = false;
@@ -62,7 +70,8 @@ function runCollectChanges() {
     }
     runningCollect = true;
 
-    const proc = spawn('node', [collectScript, collectArgs], { stdio: 'inherit' });
+    const proc = spawn('node', [collectScript, ...currentArges], { stdio: 'inherit' });
+
     proc.on('close', (code) => {
         runningCollect = false;
         if (rerunCollect) {
@@ -72,18 +81,20 @@ function runCollectChanges() {
     });
 }
 
-const watcherForExtract = chokidar.watch(path.join(__dirname, flowsFile), {
-    // ignored: /(^|[\/\\])\../, // ignore dotfiles
+// Setup filesystem warchers
+
+const watcherForExtract = chokidar.watch(flowsFile, {
     persistent: true,
-    // ignoreInitial: true,
-    // awaitWriteFinish: {
-    //     stabilityThreshold: 200,
-    //     pollInterval: 100
-    // }
+    ignoreInitial: true,
+    awaitWriteFinish: {
+        stabilityThreshold: 200,
+        pollInterval: 100
+    }
 });
 
-const watcherForCollect = chokidar.watch(watchCollectDir, {
-    ignored: /(^|[\/\\])\../, // ignore dotfiles
+const watcherForCollect = chokidar.watch(sourcePath, {
+    // ignore .test.js test files
+    // ignored: /.*\.test\.js$/, 
     persistent: true,
     ignoreInitial: true,
     awaitWriteFinish: {
@@ -108,63 +119,39 @@ watcherForCollect.on('all', (event, filePath) => {
     if (runningExtract) {
         return;
     }
+
     if (filePath.endsWith('.js') || filePath.endsWith('.vue')) {
         runCollectChanges();
     }
 });
 
-if (namedArguments['clean'] === true) {
-    const srcDir = path.join(__dirname, 'src');
+//
 
-    if (fs.existsSync(srcDir)) {
-        fs.removeSync(srcDir);
+if (startupProperties.clean === true) {
+    if (fs.existsSync(sourcePath)) {
+        fs.removeSync(sourcePath);
 
         console.info(`Cleared /src directory`);
     }
 }
 
-
-
+// Start the initial run
 
 runExtractChanges();
 
+// Report the file status
+
 console.info(`Extracting from ${flowsFile}`);
-console.info(`Collecting From ${watchCollectDir}`);
+console.info(`Collecting From ${sourcePath}`);
+ 
 
-function extractNamedArguments() {
-    const args = process.argv.slice(2); // Skip node and script path
-    const namedArgs = {};
+// Keep the process running and handle process termination
+process.on('SIGINT', async () => {
+  console.log('\nStopping watchers');
+  
+  await watcherForExtract.close();
+  await watcherForCollect.close();
 
-    for (let i = 0; i < args.length; i++) {
-        const input = args[i].trim();
-
-        if (input.startsWith('--')) {
-
-            let key
-            let value
-
-            if (input.indexOf(' ') > -1 && input.indexOf('"') === -1 && input.indexOf(`'`) === -1){
-              const parts = input.split(' ');
-
-              key = parts[0].slice(2);
-              value = parts[1];
-            } else {
-              key = input.slice(2);
-              value = args[i + 1];                
-            }
-
-            if (value && !value.startsWith('--')) {
-                namedArgs[key] = value;
-                i++;
-            } else {
-                namedArgs[key] = true; // Treat as flag if no value
-            }
-        }
-    }
-
-    return namedArgs;
-}
-
-
-
-
+  console.log('Watchers stopped');
+  process.exit(0);
+});

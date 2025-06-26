@@ -1,24 +1,36 @@
-const fs = require('fs');
-const path = require('path');
+import path from'path';
+import fs from'fs-extra';
+import yargs from 'yargs';
 
-const namedArguments = extractNamedArguments()
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import { hideBin } from 'yargs/helpers';
 
-let flowsFile =  './flows.json';
-let inputPath = path.join(__dirname, flowsFile)
+// Extract standard process arguments
 
-if (namedArguments['flows-file'] != null) {
-    flowsFile = namedArguments['flows-file'];
+const currentArges = process.argv.slice(2);
 
-    if (flowsFile.startsWith('./')) {
-        inputPath = path.join(__dirname, flowsFile)
-    } else {
-        inputPath = flowsFile
-    }
-}
+const startupProperties = yargs(hideBin(process.argv)).parse()
 
-const manfestPath = path.join(__dirname, 'src', 'manifest.json');
+const currentPathAndFile = fileURLToPath(import.meta.url);
+const currentDirectory = dirname(currentPathAndFile);
 
-const flows = JSON.parse(fs.readFileSync(inputPath, 'utf8'));
+// Default values for flows file and server URL
+
+const defaultFile = './flows.json';
+const defaultUrl = 'http://127.0.0.1:1880'
+
+const flowsFile = startupProperties.flowsFile ?? defaultFile;
+const serverAt = startupProperties.serverAt ?? defaultUrl;
+
+const flowsPath = dirname(flowsFile);
+
+const sourcePath = path.join(flowsPath, 'src');
+const manfestFile = path.join(sourcePath, 'manifest.json');
+
+// Setup the vars needed for the extraction
+ 
+const flows = JSON.parse(fs.readFileSync(flowsFile, 'utf8'));
 
 let count = 0;
 
@@ -26,6 +38,8 @@ const manifest = {}
 const folder = {}
 
 const fileNames = []
+
+// Extract TABs and SUBFLOWs
 
 flows.forEach((item) => {
     const id = item.id
@@ -36,6 +50,8 @@ flows.forEach((item) => {
         folder[id] = item.label;
     }
 })
+
+// Extract Functions and UI Templates
 
 flows.forEach((item) => {
     const id = item.id
@@ -77,11 +93,13 @@ flows.forEach((item) => {
     }
 })
 
+// For each item in the manifest, create the output directory and write the file
+
 Object.keys(manifest).forEach((id) => {
     const item = manifest[id];
 
     const folder = item.folderName;
-    const outputDir = path.join(__dirname, 'src', folder);
+    const outputDir = path.join(sourcePath, folder);
 
     // Ensure output directory exists (recursive for nested dirs)
     if (!fs.existsSync(outputDir)) {
@@ -96,7 +114,15 @@ Object.keys(manifest).forEach((id) => {
 
     const outFile = path.join(outputDir, baseFile);
 
-    const data = item.data;
+    let data = item.data;
+
+    if (startupProperties.wrap) {
+        const functionName = item.fileName.replace(/\s/g, '_');
+
+        if (item.isFun) {
+            data = `function ${functionName}(msg){\n${data}\n\n}`;  
+        }
+    }
 
     fs.writeFileSync(outFile, data, 'utf8');
 
@@ -104,44 +130,15 @@ Object.keys(manifest).forEach((id) => {
 
 });
 
-fs.writeFileSync(manfestPath, JSON.stringify(manifest, null, 2), 'utf8');
+// Save the manifest file
+
+fs.writeFileSync(manfestFile, JSON.stringify(manifest, null, 2), 'utf8');
+
+// Report the number of functions and templates extracted
 
 if (count === 0) {
     console.info('No Functions or templates found in format fields.');
 } else {
     console.info(`Extracted ${count} functions or templates.`);
 }
-
-function extractNamedArguments() {
-    const args = process.argv.slice(2); // Skip node and script path
-    const namedArgs = {};
-
-    for (let i = 0; i < args.length; i++) {
-        const input = args[i].trim();
-
-        if (input.startsWith('--')) {
-
-            let key
-            let value
-
-            if (input.indexOf(' ') > -1 && input.indexOf('"') === -1 && input.indexOf(`'`) === -1){
-              const parts = input.split(' ');
-
-              key = parts[0].slice(2);
-              value = parts[1];
-            } else {
-              key = input.slice(2);
-              value = args[i + 1];                
-            }
-
-            if (value && !value.startsWith('--')) {
-                namedArgs[key] = value;
-                i++;
-            } else {
-                namedArgs[key] = true; // Treat as flag if no value
-            }
-        }
-    }
-
-    return namedArgs;
-}
+ 

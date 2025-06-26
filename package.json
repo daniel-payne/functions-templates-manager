@@ -1,12 +1,17 @@
 {
   "name": "functions-templates-manager",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Node Functions to extract code functions and ui-templates to use in VS Code",
   "license": "ISC",
   "author": "daniel.payne@keldan.co.uk",
-  "type": "commonjs",
-  "main": "index.js",
+  "type": "module",
+  "main": "functions-templates-watch.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "watch": "node functions-templates-watch"
+  },
+  "dependencies": {
+    "chokidar": "^4.0.3",
+    "fs-extra": "^11.3.0",
+    "yargs": "^18.0.0"
   }
 }
