@@ -1,6 +1,6 @@
 import chokidar from 'chokidar';
-import path from'path';
-import fs from'fs-extra';
+import path from 'path';
+import fs from 'fs-extra';
 import yargs from 'yargs';
 
 import { spawn } from 'child_process';
@@ -44,10 +44,12 @@ function runExtractChanges() {
     if (runningCollect) {
         return;
     }
+
     if (runningExtract) {
         rerunExtract = true;
         return;
     }
+
     runningExtract = true;
     const proc = spawn('node', [extractScript, ...currentArges], { stdio: 'inherit' });
     proc.on('close', (code) => {
@@ -68,12 +70,16 @@ function runCollectChanges() {
         rerunCollect = true;
         return;
     }
+
     runningCollect = true;
 
     const proc = spawn('node', [collectScript, ...currentArges], { stdio: 'inherit' });
 
     proc.on('close', (code) => {
-        runningCollect = false;
+        setTimeout(() => {
+            runningCollect = false;
+        }, 250);
+
         if (rerunCollect) {
             rerunCollect = false;
             runCollectChanges();
@@ -108,7 +114,7 @@ watcherForExtract.on('all', (event, filePath) => {
         return;
     }
 
-    console.info(`Detected change (${event}) in ${filePath}.`);
+    console.info(`INFO: detected change (${event}) in ${filePath.replace(/^.*[\\/]/, '')}.`);
 
     if (filePath.endsWith('.json')) {
         runExtractChanges();
@@ -131,7 +137,7 @@ if (startupProperties.clean === true) {
     if (fs.existsSync(sourcePath)) {
         fs.removeSync(sourcePath);
 
-        console.info(`Cleared /src directory`);
+        console.info(`INFO: cleared /src directory`);
     }
 }
 
@@ -141,17 +147,17 @@ runExtractChanges();
 
 // Report the file status
 
-console.info(`Extracting from ${flowsFile}`);
-console.info(`Collecting From ${sourcePath}`);
- 
+console.info(`INFO: extracting from ${flowsFile}`);
+console.info(`INFO: collecting From ${sourcePath}`);
+
 
 // Keep the process running and handle process termination
 process.on('SIGINT', async () => {
-  console.log('\nStopping watchers');
-  
-  await watcherForExtract.close();
-  await watcherForCollect.close();
+    console.log('\nStopping watchers');
 
-  console.log('Watchers stopped');
-  process.exit(0);
+    await watcherForExtract.close();
+    await watcherForCollect.close();
+
+    console.log('Watchers stopped');
+    process.exit(0);
 });

@@ -1,5 +1,5 @@
-import path from'path';
-import fs from'fs-extra';
+import path from 'path';
+import fs from 'fs-extra';
 import yargs from 'yargs';
 
 import { fileURLToPath } from 'url';
@@ -35,7 +35,7 @@ let sourceFiles = [];
 try {
     sourceFiles = getAllFiles(sourcePath, ['.vue', '.js']);
 } catch (error) {
-    console.error(`ERROR : Could not find any files ro read in ${sourcePath}`);
+    console.error(`ERROR: Could not find any files ro read in ${sourcePath}`);
     process.exit(1);
 }
 
@@ -50,12 +50,12 @@ try {
     manfest = JSON.parse(fs.readFileSync(manfestFile, 'utf8'));
 
 } catch (error) {
-    console.error(`ERROR : Could not read flows file ${flowsFile} or manifest file ${manfestFile}. Please check the file paths and ensure they are valid JSON.`);
+    console.error(`ERROR: Could not read flows file ${flowsFile} or manifest file ${manfestFile}. Please check the file paths and ensure they are valid JSON.`);
     process.exit(1);
 }
 
 if (flows == null || manfest == null) {
-    console.error(`ERROR : Could not read flows file ${flowsFile} or manifest file ${manfestFile}. Please check the file paths and ensure they are valid JSON.`);
+    console.error(`ERROR: Could not read flows file ${flowsFile} or manifest file ${manfestFile}. Please check the file paths and ensure they are valid JSON.`);
     process.exit(1);
 }
 
@@ -68,21 +68,21 @@ sourceFiles.forEach(file => {
     const templateContent = fs.readFileSync(filePath, 'utf8');
 
     const fileName = file.replace(/\.vue$/, '').replace(/\.js$/, '').split('/').pop();
-    
+
     const flowId = Object.keys(manfest).find(key => manfest[key].fileName === fileName);
 
-    if(flowId == null){
-        console.error(`ERROR : ${file} not in manifest.json, does this file exist in flows.json?`);
+    if (flowId == null) {
+        console.error(`ERROR: ${file} not in manifest.json, does this file exist in flows.json?`);
 
         return
     }
-    
+
     // Find and update the corresponding flow
     const isVue = file.endsWith('.vue');
     const isJs = file.endsWith('.js');
-    
+
     let flow;
-    
+
     if (isVue) {
         flow = flows.find(f => f.id === flowId && typeof f.format === 'string' && f.format.trim().startsWith('<template>'));
         if (flow) {
@@ -92,13 +92,13 @@ sourceFiles.forEach(file => {
 
             flow.format = templateContent;
             updatedCount++;
-            console.info(`Updated flow id ${flowId} with ${file}`);
+            console.info(`INFO: updated flow id ${flowId} with ${file}`);
         }
     } else if (isJs) {
         flow = flows.find(f => f.id === flowId && typeof f.func === 'string');
 
         if (flow) {
-             
+
             const functionTemplate = removeFunctionWrapper(templateContent);
 
 
@@ -109,8 +109,8 @@ sourceFiles.forEach(file => {
             flow.func = functionTemplate.trim();
 
             updatedCount++;
-            
-            console.info(`Updated flow id ${flowId} with ${file}`);
+
+            console.info(`INFO: updated flow id ${flowId} with ${file}`);
         }
     }
 });
@@ -154,7 +154,7 @@ function areContentsSame(str1, str2) {
     // Remove all whitespace, tabs, and newlines from both strings
     const cleanStr1 = str1.replace(/\s/g, '');
     const cleanStr2 = str2.replace(/\s/g, '');
-    
+
     // Compare the cleaned strings
     return cleanStr1 === cleanStr2;
 }
@@ -173,13 +173,13 @@ async function reloadFlows(nodeRedUrl) {
         });
 
         if (response.status === 204) {
-            console.info('Flows reloaded successfully');
+            console.info('INFO: flows reloaded successfully');
         } else {
-            console.error(`Error Connecting with node-red: Status ${response.status}`);
+            console.error(`ERROR: connecting with node-red: Status ${response.status}`);
         }
 
     } catch (error) {
-        console.error('Error: Could not connect with node-red on : ' + nodeRedUrl);
+        console.error('ERROR: could not connect with node-red --server-at : ' + nodeRedUrl);
     }
 }
 

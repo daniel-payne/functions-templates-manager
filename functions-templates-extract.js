@@ -1,5 +1,5 @@
-import path from'path';
-import fs from'fs-extra';
+import path from 'path';
+import fs from 'fs-extra';
 import yargs from 'yargs';
 
 import { fileURLToPath } from 'url';
@@ -29,7 +29,7 @@ const sourcePath = path.join(flowsPath, 'src');
 const manfestFile = path.join(sourcePath, 'manifest.json');
 
 // Setup the vars needed for the extraction
- 
+
 const flows = JSON.parse(fs.readFileSync(flowsFile, 'utf8'));
 
 let count = 0;
@@ -47,7 +47,7 @@ flows.forEach((item) => {
     if (item.type === 'tab') {
         folder[id] = item.label;
     } else if (item.type === 'subflow') {
-        folder[id] = item.label;
+        folder[id] = item.name;
     }
 })
 
@@ -120,7 +120,7 @@ Object.keys(manifest).forEach((id) => {
         const functionName = item.fileName.replace(/\s/g, '_');
 
         if (item.isFun) {
-            data = `export default function ${functionName}(msg){\n${data}\n\n}`;  
+            data = `export default function ${functionName}(msg){\n${data}\n\n}`;
         }
     }
 
@@ -134,11 +134,63 @@ Object.keys(manifest).forEach((id) => {
 
 fs.writeFileSync(manfestFile, JSON.stringify(manifest, null, 2), 'utf8');
 
+let sourceFiles = [];
+
+try {
+    sourceFiles = getAllFiles(sourcePath, ['.vue', '.js']);
+} catch (error) {
+    console.error(`ERROR: could not find any files ro read in ${sourcePath}`);
+    process.exit(1);
+}
+
+sourceFiles.forEach(file => {
+    let found = false;
+
+    Object.keys(manifest).forEach((id) => {
+        const item = manifest[id];
+
+        if (file.indexOf(item.folderName) > -1 && file.indexOf(item.fileName) > -1) {
+            found = true;
+        }
+    });
+
+    if (!found) {
+        const filePath = path.join(sourcePath, file);
+
+        fs.removeSync(filePath);
+
+        console.info(`INFO: removed unused file: ${file}`);
+    }
+})
+
 // Report the number of functions and templates extracted
 
 if (count === 0) {
-    console.info('No Functions or templates found in format fields.');
+    console.info('INFO : No Functions or templates found in format fields.');
 } else {
-    console.info(`Extracted ${count} functions or templates.`);
+    console.info(`INFO: extracted ${count} functions or templates.`);
 }
- 
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function getAllFiles(dir, exts, fileList = [], relDir = '') {
+    const files = fs.readdirSync(dir);
+
+    files.forEach(file => {
+        const filePath = path.join(dir, file);
+        const relPath = path.join(relDir, file);
+        const stat = fs.statSync(filePath);
+
+        if (stat.isDirectory()) {
+            getAllFiles(filePath, exts, fileList, relPath);
+        } else if (exts.some(ext => file.endsWith(ext))) {
+            fileList.push(relPath);
+        }
+
+    });
+
+    return fileList;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

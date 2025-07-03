@@ -100,3 +100,9 @@ Added ```--wrap``` flag.
 Renamed ```--server-url``` to ```--server-at``` to match console output from node-red.
 
 Refactored code & fixed bug in 1.0.3 file watcher.
+
+### version 1.0.5
+
+When you delete a function from the ```flows.json``` and **deploy**, the file gets deleted from the /src folder
+
+Also improved console messages, so you can see if anything has gone wrong more easily.
