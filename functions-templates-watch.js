@@ -141,6 +141,10 @@ if (startupProperties.clean === true) {
     }
 }
 
+if (!fs.existsSync(sourcePath)) {
+    fs.mkdirSync(sourcePath);
+}
+
 // Start the initial run
 
 runExtractChanges();

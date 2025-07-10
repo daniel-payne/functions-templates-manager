@@ -106,3 +106,24 @@ Refactored code & fixed bug in 1.0.3 file watcher.
 When you delete a function from the ```flows.json``` and **deploy**, the file gets deleted from the /src folder
 
 Also improved console messages, so you can see if anything has gone wrong more easily.
+
+### version 1.0.6
+
+Fixed a bug when running on empty projects.
+**NOTE** you must do a deploy with at least one node for the flows.json file to be created in a new project.
+
+I start new node-red projects like this 
+
+1. Run ```npm init``` in an empty directory
+2. Update my **package.json** with this
+```
+  "scripts": {
+    "dev": "node-red -u <PATH-TO-FOLDER> -p 8081",
+    "watch": "node <PATH-TO-functions-templates-watch> --flows-file <PATH-TO-FOLDER>/flows.json --server-at http://127.0.0.1:8081"
+  },
+```
+3. Run ```npm run dev```
+4. Add a node in the node-red IDE and deploy
+5. Run ```npm run watch```
+
+then everything is good for development in a new clean project

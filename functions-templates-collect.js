@@ -42,15 +42,18 @@ try {
 // Read in flow and manfest
 
 let flows;
-let manfest;
+let manfest = {};
 
 try {
 
     flows = JSON.parse(fs.readFileSync(flowsFile, 'utf8'));
-    manfest = JSON.parse(fs.readFileSync(manfestFile, 'utf8'));
+
+    if (fs.accessSync(manfestFile, fs.R_OK)) {
+        manfest = JSON.parse(fs.readFileSync(manfestFile, 'utf8'));
+    }
 
 } catch (error) {
-    console.error(`ERROR: Could not read flows file ${flowsFile} or manifest file ${manfestFile}. Please check the file paths and ensure they are valid JSON.`);
+    console.error(`ERROR XXX: Could not read flows file ${flowsFile} or manifest file ${manfestFile}. Please check the file paths and ensure they are valid JSON.`);
     process.exit(1);
 }
 
