@@ -1,6 +1,6 @@
 {
   "name": "functions-templates-manager",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Node Functions to extract code functions and ui-templates to use in VS Code",
   "license": "ISC",
   "author": "daniel.payne@keldan.co.uk",

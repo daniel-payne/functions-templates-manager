@@ -71,9 +71,38 @@ export default function function_name(msg){
 }
 ```
 
+## Running non-global node-red projects for github
+
+I start new node-red projects like this;
+
+1. Run ```npm init``` in an empty directory
+2. Update my **package.json** with this
+```
+  "scripts": {
+    "dev": "node-red -u <PATH-TO-FOLDER> -p 8081",
+    "watch": "node <PATH-TO-functions-templates-watch> --flows-file <PATH-TO-FOLDER>/flows.json --server-at http://127.0.0.1:8081",
+  },
+  "dependencies": {
+    "node-red": "^3.1.15",
+    "@flowfuse/node-red-dashboard": "^1.26.0",
+    "chokidar": "^4.0.3",
+    "fs-extra": "^11.3.0",
+    "yargs": "^18.0.0"
+  }
+```
+3. Run ```npm install```
+4. Run ```npm run dev```
+5. Add a node in the node-red IDE and deploy
+6. Run ```npm run watch```
+
+Then everything is good for development in a new clean project.
+
+
 ## Video overview
 
-[Node-red and VS-code Integration on youtube](https://www.youtube.com/watch?v=UivEETkSWW8)
+Node-red and VS-code Integration on youtube
+
+[<img src="https://i9.ytimg.com/vi_webp/UivEETkSWW8/mq1.webp?sqp=CPzYo8QG-oaymwEmCMACELQB8quKqQMa8AEB-AH-CYAC0AWKAgwIABABGFwgZShbMA8=&rs=AOn4CLBoCSZDypSHu-6DNYPt-VzwZ0cpPA" alt="Node-red and VS-code Integration on youtube"> ](https://www.youtube.com/watch?v=UivEETkSWW8)
 
 ## Versions
 
@@ -127,3 +156,33 @@ I start new node-red projects like this
 5. Run ```npm run watch```
 
 then everything is good for development in a new clean project
+
+### version 1.0.7
+
+Added extract and collect for functions
+
+
+| Function Node  | File Name          |
+| -------------- | ------------------ |
+| On Start       | *.initialise.js    |
+| On End         | *.fininalise.js    |
+| Description    | *.info.md          |
+
+
+Added extract and collect for dashboard 2 templates
+
+| Template Node  | File Name          |
+| -------------- | ------------------ |
+| Description    | *.info.md          |
+
+**Nesting in vs-code**
+
+These are the nesting patterns I add in vs-code to group my node-red files togther
+
+*.js
+
+```${capture}.test.js, ${capture}.finalize.js, ${capture}.initialize.js, ${capture}.info.md```
+
+*.vue
+
+```${capture}.test.vue, ${capture}.info.md```

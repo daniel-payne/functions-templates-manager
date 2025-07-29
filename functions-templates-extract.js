@@ -86,10 +86,31 @@ flows.forEach((item) => {
     const isVue = (typeof item.format === 'string' && (item.format.trim().indexOf('<template>') !== -1))
     const isFun = (typeof item.func === 'string' && item.func.trim().length > 0) && isVue === false
 
-    const data = isVue ? item.format : item.func;
+    let code = isVue ? item.format : item.func;
+
+    let initialize = isFun ? item.initialize : undefined;
+    let finalize = isFun ? item.finalize : undefined;
+
+    let info = item.info ?? undefined;
+
+    if ((code ?? '').trim().length === 0) {
+        code = undefined
+    }
+
+    if ((initialize ?? '').trim().length === 0) {
+        initialize = undefined
+    }
+
+    if ((finalize ?? '').trim().length === 0) {
+        finalize = undefined
+    }
+
+    if ((info ?? '').trim().length === 0) {
+        info = undefined
+    }
 
     if (isVue || isFun) {
-        manifest[id] = { folderName, name, sanitizedName, fileName, isVue, isFun, data };
+        manifest[id] = { folderName, name, sanitizedName, fileName, isVue, isFun, code, initialize, finalize, info };
     }
 })
 
@@ -108,26 +129,62 @@ Object.keys(manifest).forEach((id) => {
 
     count++;
 
-    let baseName = item.fileName;
+    const baseName = item.fileName;
 
-    const baseFile = `${baseName}.${item.isVue ? 'vue' : 'js'}`
+    const codeName = `${baseName}.${item.isVue ? 'vue' : 'js'}`
 
-    const outFile = path.join(outputDir, baseFile);
+    const initializeName = `${baseName}.initialize.js`
+    const finalizeName = `${baseName}.finalize.js`
+    const infoName = `${baseName}.info.md`
 
-    let data = item.data;
+    const codeFile = path.join(outputDir, codeName);
+
+    const initializeFile = path.join(outputDir, initializeName);
+    const finalizeFile = path.join(outputDir, finalizeName);
+    const infoFile = path.join(outputDir, infoName);
+
+    let code = item.code;
+    let initialize = item.initialize;
+    let finalize = item.finalize;
+    let info = item.info;
 
     if (startupProperties.wrap) {
         const functionName = item.fileName.replace(/\s/g, '_');
 
-        if (item.isFun) {
-            data = `export default function ${functionName}(msg){\n${data}\n\n}`;
+        if (item.isFun && code != null) {
+            code = `export default function ${functionName}(msg){\n${code}\n\n}`;
+        }
+
+        if (item.isFun && initialize != null) {
+            initialize = `export default function ${functionName}(msg){\n${initialize}\n\n}`;
+        }
+
+        if (item.isFun && finalize != null) {
+            finalize = `export default function ${functionName}(msg){\n${finalize}\n\n}`;
         }
     }
 
-    fs.writeFileSync(outFile, data, 'utf8');
+    if (code != null) {
+        fs.writeFileSync(codeFile, code, 'utf8');
+    }
 
-    item.data = null;
+    if (initialize != null) {
+        fs.writeFileSync(initializeFile, initialize, 'utf8');
+    }
 
+    if (finalize != null) {
+        fs.writeFileSync(finalizeFile, finalize, 'utf8');
+    }
+
+    if (info != null) {
+        fs.writeFileSync(infoFile, info, 'utf8');
+    }
+
+    // Save space in the manfest file by removing unnecessary properties
+    item.code = null;
+    item.initialize = null;
+    item.finalize = null;
+    item.info = null;
 });
 
 // Save the manifest file
@@ -137,9 +194,9 @@ fs.writeFileSync(manfestFile, JSON.stringify(manifest, null, 2), 'utf8');
 let sourceFiles = [];
 
 try {
-    sourceFiles = getAllFiles(sourcePath, ['.vue', '.js']);
+    sourceFiles = getAllFiles(sourcePath, ['.vue', '.js', '.md']);
 } catch (error) {
-    console.error(`ERROR: could not find any files ro read in ${sourcePath}`);
+    console.error(`ERROR-E01: could not find any files ro read in ${sourcePath}`);
     process.exit(1);
 }
 
