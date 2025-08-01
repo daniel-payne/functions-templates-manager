@@ -80,7 +80,7 @@ I start new node-red projects like this;
 ```
   "scripts": {
     "dev": "node-red -u <PATH-TO-FOLDER> -p 8081",
-    "watch": "node <PATH-TO-functions-templates-watch> --flows-file <PATH-TO-FOLDER>/flows.json --server-at http://127.0.0.1:8081",
+    "watch": "node <PATH-TO-functions-templates-watch> --flows-file <PATH-TO-FOLDER>/flows.json --server-at http://127.0.0.1:8081"
   },
   "dependencies": {
     "node-red": "^3.1.15",
@@ -88,7 +88,7 @@ I start new node-red projects like this;
     "chokidar": "^4.0.3",
     "fs-extra": "^11.3.0",
     "yargs": "^18.0.0"
-  }
+  },
 ```
 3. Run ```npm install```
 4. Run ```npm run dev```
