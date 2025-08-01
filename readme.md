@@ -186,3 +186,8 @@ These are the nesting patterns I add in vs-code to group my node-red files togth
 *.vue
 
 ```${capture}.test.vue, ${capture}.info.md```
+
+### version 1.0.7
+
+minor bugfixes to On Start extraction
+

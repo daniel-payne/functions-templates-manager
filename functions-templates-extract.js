@@ -83,8 +83,12 @@ flows.forEach((item) => {
         fileName = sanitizedName;
     }
 
-    const isVue = (typeof item.format === 'string' && (item.format.trim().indexOf('<template>') !== -1))
+    const hasTemplate = item.format?.trim().indexOf('<template>') !== -1 ?? false
+    const hasScript   = item.format?.trim().indexOf('<script>') !== -1 ?? false
+
+    const isVue = (typeof item.format === 'string' && ( hasTemplate || hasScript ))
     const isFun = (typeof item.func === 'string' && item.func.trim().length > 0) && isVue === false
+
 
     let code = isVue ? item.format : item.func;
 

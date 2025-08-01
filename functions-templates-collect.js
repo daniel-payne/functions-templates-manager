@@ -95,7 +95,7 @@ sourceFiles.forEach(file => {
     let flow;
 
     if (isVue) {
-        flow = flows.find(f => f.id === flowId && typeof f.format === 'string' && f.format.trim().startsWith('<template>'));
+        flow = flows.find(f => f.id === flowId && typeof f.format === 'string');
 
         if (flow) {
 
