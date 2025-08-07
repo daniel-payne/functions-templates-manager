@@ -83,10 +83,10 @@ I start new node-red projects like this;
     "watch": "node <PATH-TO-functions-templates-watch> --flows-file <PATH-TO-FOLDER>/flows.json --server-at http://127.0.0.1:8081"
   },
   "dependencies": {
-    "node-red": "^3.1.15",
+    "node-red": "^4.1.0",
     "@flowfuse/node-red-dashboard": "^1.26.0",
     "chokidar": "^4.0.3",
-    "fs-extra": "^11.3.0",
+    "fs-extra": "^11.3.1",
     "yargs": "^18.0.0"
   },
 ```
