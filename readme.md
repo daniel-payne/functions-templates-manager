@@ -79,8 +79,8 @@ I start new node-red projects like this;
 2. Update my **package.json** with this
 ```
   "scripts": {
-    "dev": "node-red -u <PATH-TO-FOLDER> -p 8081",
-    "watch": "node <PATH-TO-functions-templates-watch> --flows-file <PATH-TO-FOLDER>/flows.json --server-at http://127.0.0.1:8081"
+    "dev": "node-red -u <PATH-TO-folder> -p 8081",
+    "watch": "node <PATH-TO-functions-templates-watch> --flows-file <PATH-TO-folder>/flows.json --server-at http://127.0.0.1:8081"
   },
   "dependencies": {
     "node-red": "^4.1.0",
@@ -92,8 +92,9 @@ I start new node-red projects like this;
 ```
 3. Run ```npm install```
 4. Run ```npm run dev```
-5. Add a node in the node-red IDE and deploy
-6. Run ```npm run watch```
+5. **IMPORTANT** replace <PATH-TO-folder> & <PATH-TO-functions-templates-watch> in package.json
+6. Add a node in the node-red IDE and deploy
+7. Run ```npm run watch```
 
 Then everything is good for development in a new clean project.
 
