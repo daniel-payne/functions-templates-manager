@@ -92,7 +92,7 @@ I start new node-red projects like this;
 ```
 3. Run ```npm install```
 4. Run ```npm run dev```
-5. **IMPORTANT** replace <PATH-TO-folder> & <PATH-TO-functions-templates-watch> in package.json
+5. **IMPORTANT** replace PATH-TO-folder & PATH-TO-functions-templates-watch in package.json
 6. Add a node in the node-red IDE and deploy
 7. Run ```npm run watch```
 
