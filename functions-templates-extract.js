@@ -87,7 +87,11 @@ flows.forEach((item) => {
     const hasScript   = item.format?.trim().indexOf('<script>') !== -1 ?? false
 
     const isVue = (typeof item.format === 'string' && ( hasTemplate || hasScript ))
-    const isFun = (typeof item.func === 'string' && item.func.trim().length > 0) && isVue === false
+    const isFun = (
+                    (typeof item.func       === 'string' && item.func.trim().length       > 0) ||
+                    (typeof item.initialize === 'string' && item.initialize.trim().length > 0) ||
+                    (typeof item.finalize   === 'string' && item.finalize.trim().length   > 0) 
+                  ) && isVue === false
 
 
     let code = isVue ? item.format : item.func;

@@ -190,7 +190,10 @@ These are the nesting patterns I add in vs-code to group my node-red files togth
 
 ### version 1.0.8
 
-minor bugfixes to On Start extraction
+Minor bugfixes to On Start extraction
 
- 
+### version 1.0.9
+
+Small update to allow extraction of On Start / On Stop with an empty On Message function
+
 
