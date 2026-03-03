@@ -126,7 +126,7 @@ watcherForCollect.on('all', (event, filePath) => {
         return;
     }
 
-    if (filePath.endsWith('.js') || filePath.endsWith('.vue') || filePath.endsWith('.md')) {
+    if (filePath.endsWith('.js') || filePath.endsWith('.vue') || filePath.endsWith('.md') || filePath.endsWith('.sql')) {
         runCollectChanges();
     }
 });

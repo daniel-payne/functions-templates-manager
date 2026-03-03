@@ -196,4 +196,8 @@ Minor bugfixes to On Start extraction
 
 Small update to allow extraction of On Start / On Stop with an empty On Message function
 
+### version 1.0.10
+
+Updated to extract SQL from postgres nodes.
+
 

@@ -63,6 +63,8 @@ flows.forEach((item) => {
         name = item.name;
     } else if (type === 'ui-template') {
         name = item.name;
+    } else if (type === 'postgresql') {
+        name = item.name;
     } else {
         return
     }
@@ -84,17 +86,21 @@ flows.forEach((item) => {
     }
 
     const hasTemplate = item.format?.trim().indexOf('<template>') !== -1 ?? false
-    const hasScript   = item.format?.trim().indexOf('<script>') !== -1 ?? false
+    const hasScript = item.format?.trim().indexOf('<script>') !== -1 ?? false
 
-    const isVue = (typeof item.format === 'string' && ( hasTemplate || hasScript ))
+    const isVue = (typeof item.format === 'string' && (hasTemplate || hasScript))
     const isFun = (
-                    (typeof item.func       === 'string' && item.func.trim().length       > 0) ||
-                    (typeof item.initialize === 'string' && item.initialize.trim().length > 0) ||
-                    (typeof item.finalize   === 'string' && item.finalize.trim().length   > 0) 
-                  ) && isVue === false
+        (typeof item.func === 'string' && item.func.trim().length > 0) ||
+        (typeof item.initialize === 'string' && item.initialize.trim().length > 0) ||
+        (typeof item.finalize === 'string' && item.finalize.trim().length > 0)
+    ) && isVue === false
+    const isSql = (typeof item.query === 'string' && item.query.trim().length > 0) && isVue === false && isFun === false
 
+    let code
 
-    let code = isVue ? item.format : item.func;
+    code = isFun ? item.func : code;
+    code = isVue ? item.format : code;
+    code = isSql ? item.query : code;
 
     let initialize = isFun ? item.initialize : undefined;
     let finalize = isFun ? item.finalize : undefined;
@@ -117,8 +123,8 @@ flows.forEach((item) => {
         info = undefined
     }
 
-    if (isVue || isFun) {
-        manifest[id] = { folderName, name, sanitizedName, fileName, isVue, isFun, code, initialize, finalize, info };
+    if (isVue || isFun || isSql) {
+        manifest[id] = { folderName, name, sanitizedName, fileName, isVue, isFun, isSql, code, initialize, finalize, info };
     }
 })
 
@@ -139,7 +145,7 @@ Object.keys(manifest).forEach((id) => {
 
     const baseName = item.fileName;
 
-    const codeName = `${baseName}.${item.isVue ? 'vue' : 'js'}`
+    const codeName = `${baseName}.${item.isVue ? 'vue' : item.isFun ? 'js' : item.isSql ? 'sql' : 'js'}`
 
     const initializeName = `${baseName}.initialize.js`
     const finalizeName = `${baseName}.finalize.js`
@@ -202,7 +208,7 @@ fs.writeFileSync(manfestFile, JSON.stringify(manifest, null, 2), 'utf8');
 let sourceFiles = [];
 
 try {
-    sourceFiles = getAllFiles(sourcePath, ['.vue', '.js', '.md']);
+    sourceFiles = getAllFiles(sourcePath, ['.vue', '.js', '.md', '.sql']);
 } catch (error) {
     console.error(`ERROR-E01: could not find any files ro read in ${sourcePath}`);
     process.exit(1);

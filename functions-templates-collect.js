@@ -28,12 +28,12 @@ const flowsPath = dirname(flowsFile);
 const sourcePath = path.join(flowsPath, 'src');
 const manfestFile = path.join(sourcePath, 'manifest.json');
 
-// Collect all .vue and .js files from all subdirectories
+// Collect all files from all subdirectories
 
 let sourceFiles = [];
 
 try {
-    sourceFiles = getAllFiles(sourcePath, ['.vue', '.js', '.md']);
+    sourceFiles = getAllFiles(sourcePath, ['.vue', '.js', '.md', '.sql']);
 } catch (error) {
     console.error(`ERROR-C01: Could not find any files ro read in ${sourcePath}`);
     process.exit(1);
@@ -72,10 +72,10 @@ sourceFiles.forEach(file => {
 
     const isInitialize = file.indexOf('.initialize.') !== -1;
     const isFinalize = file.indexOf('.finalize.') !== -1;
-  
+
     const isCode = isFinalize === false && isInitialize === false;
 
-    const baseName = file.replace(/\.initialize\./, '.').replace(/\.finalize\./, '.').replace(/\.info\./, '.').replace(/\.vue$/, '').replace(/\.js$/, '').replace(/\.md$/, '')
+    const baseName = file.replace(/\.initialize\./, '.').replace(/\.finalize\./, '.').replace(/\.info\./, '.').replace(/\.vue$/, '').replace(/\.js$/, '').replace(/\.md$/, '').replace(/\.sql$/, '')
 
     const fileName = baseName.split('/').pop().trim();
 
@@ -91,6 +91,7 @@ sourceFiles.forEach(file => {
     const isVue = file.endsWith('.vue');
     const isJs = file.endsWith('.js');
     const isInfo = file.endsWith('.md');
+    const isSql = file.endsWith('.sql');
 
     let flow;
 
@@ -111,7 +112,7 @@ sourceFiles.forEach(file => {
 
                 console.info(`INFO: updated flow id ${flowId} with ${file}`);
 
-            } 
+            }
 
 
             // if (flow.format === templateContent) {
@@ -165,7 +166,7 @@ sourceFiles.forEach(file => {
 
                 console.info(`INFO: updated flow id ${flowId} with ${file}`);
 
-            } 
+            }
         }
     } else if (isInfo === true) {
         flow = flows.find(f => f.id === flowId);
@@ -179,7 +180,18 @@ sourceFiles.forEach(file => {
         updatedCount++;
 
         console.info(`INFO: updated flow id ${flowId} with ${file}`);
+    } else if (isSql === true) {
+        flow = flows.find(f => f.id === flowId);
 
+        if (areContentsSame(flow.query, templateContent)) {
+            return;
+        }
+
+        flow.query = templateContent;
+
+        updatedCount++;
+
+        console.info(`INFO: updated flow id ${flowId} with ${file}`);
     }
 });
 
